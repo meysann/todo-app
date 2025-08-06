@@ -1,0 +1,5 @@
+Flask
+Flask-CORS
+redis
+pika  # for RabbitMQ
+psycopg2-binary # for PostgreSQL

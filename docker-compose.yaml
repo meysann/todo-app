@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # The Backend Service
+  todo-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: todo-backend
+    ports:
+      - "5000:5000"
+    environment:
+      # These environment variables will be used by our Flask app
+      # to connect to the other services.
+      DB_HOST: todo-db
+      REDIS_HOST: todo-redis
+      MQ_HOST: todo-rabbitmq
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: tododb
+    depends_on:
+      - todo-db
+      - todo-redis
+      - todo-rabbitmq
+
+  # The Frontend Service
+  todo-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: todo-frontend
+    ports:
+      - "80:80"  # Expose port 80 of the container to port 80 of the host
+
+  # The Database Service (PostgreSQL)
+  todo-db:
+    image: postgres:13-alpine
+    container_name: todo-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: tododb
+    # This volume ensures our database data persists even if the container is removed
+    volumes:
+      - tododb_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # The Redis Service
+  todo-redis:
+    image: redis:6-alpine
+    container_name: todo-redis
+    # This is a key-value store, we don't need volumes for this simple example
+    ports:
+      - "6379:6379"
+
+  # The Message Broker Service (RabbitMQ)
+  todo-rabbitmq:
+    image: rabbitmq:3.8-management-alpine
+    container_name: todo-rabbitmq
+    ports:
+      - "5672:5672"  # The standard RabbitMQ port
+      - "15672:15672" # The management UI port
+
+volumes:
+  tododb_data:

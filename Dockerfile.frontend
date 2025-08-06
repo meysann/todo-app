@@ -1,0 +1,10 @@
+# Use a lightweight nginx image as our base
+FROM nginx:alpine
+
+# Copy our front-end files into the nginx web server's default directory
+COPY ./frontend/ /usr/share/nginx/html
+
+# Expose port 80, which is the default for nginx
+EXPOSE 80
+
+# The default nginx command will run automatically
