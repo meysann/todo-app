@@ -4,17 +4,23 @@ FROM python:3.9-slim
 # Set the working directory in the container
 WORKDIR /app
 
+# Install netcat and other dependencies for our startup script
+RUN apt-get update && apt-get install -y netcat-openbsd && rm -rf /var/lib/apt/lists/*
+
 # Copy the requirements file into the container
 COPY ./backend/requirements.txt /app/requirements.txt
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application's source code
+# Copy the rest of the application's source code, including start.sh
 COPY ./backend/ /app
+
+# Make the start script executable
+RUN chmod +x /app/start.sh
 
 # Make port 5000 available to the world outside this container
 EXPOSE 5000
 
-# Run app.py when the container launches
-CMD ["python", "app.py"]
+# Run our new start script when the container launches
+CMD ["/app/start.sh"]
